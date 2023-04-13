@@ -16,17 +16,17 @@ const checkParameters = (
     !imageName ||
     !EXTENSION_FROMATS.includes(path.extname(imageName as string))
   ) {
-    res.status(400).send('Invalid imageName');
+    res.status(400).send('Invalid original file names');
     return 0;
   }
 
   if (checkWidth) {
-    res.status(400).send('Invalid width');
+    res.status(400).send('Invalid width parameters');
     return 0;
   }
 
   if (checkHeight) {
-    res.status(400).send('Invalid height');
+    res.status(400).send('Invalid height parameters');
     return 0;
   }
 

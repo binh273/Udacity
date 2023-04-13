@@ -1,5 +1,8 @@
 import request from 'supertest';
+import Request from 'request';
 import app from '../index';
+import routers from '../routers/resizeImage_Router';
+import resizeImage from '../utilities/resizeImage';
 
 describe('Check middleware:', () => {
   let response: request.Response;
@@ -32,11 +35,11 @@ describe('Check middleware:', () => {
 
   it('Check url with parameters imageName = null return status 400 and text is Invalid imageName : ', () => {
     expect(responseImageName.status).toBe(400);
-    expect(responseImageName.text).toBe('Invalid imageName');
+    expect(responseImageName.text).toBe('Invalid original file names');
   });
 
   it('Check url with missing parameters width return text Invalid Width: ', () => {
-    expect(responseWidth.text).toBe('Invalid width');
+    expect(responseWidth.text).toBe('Invalid width parameters');
   });
 
   it('Check url with parameters height = 0 return status 400 : ', () => {
@@ -44,11 +47,11 @@ describe('Check middleware:', () => {
   });
 });
 
-describe('Check routers:', () => {
+describe('Check function resizeImage:', () => {
   let responseImageNameInvalid: request.Response;
   let responseWidth: request.Response;
-  const imageName = 'test.jpg';
   const imageNameInvalid = 'test2.jpg';
+  const imageName = 'test.jpg';
   const width = 200;
   const height = 200;
   const widthInvalid = 1000000;
@@ -62,13 +65,14 @@ describe('Check routers:', () => {
     );
   });
 
-  it('Check url with parameters imageName not exists return status 400 and text is Image not exists in folder: ', () => {
+  it('Check function resizeImage status 400 and text is Image not exists in folder: ', () => {
     expect(responseImageNameInvalid.status).toBe(404);
     expect(responseImageNameInvalid.text).toBe('Image not exists in folder');
   });
 
-  it('Check url with parameters imageName not exists return status 500 and text is Resizing the image error!. : ', () => {
+  it('Check function resizeImage return status 500 and text is Resizing the image error!. : ', () => {
     expect(responseWidth.status).toBe(500);
     expect(responseWidth.text).toBe('Resizing the image error!.');
   });
 });
+
