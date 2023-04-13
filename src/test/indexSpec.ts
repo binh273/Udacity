@@ -1,7 +1,5 @@
 import request from 'supertest';
-import Request from 'request';
 import app from '../index';
-import routers from '../routers/resizeImage_Router';
 import resizeImage from '../utilities/resizeImage';
 
 describe('Check middleware:', () => {
@@ -47,32 +45,74 @@ describe('Check middleware:', () => {
   });
 });
 
-describe('Check function resizeImage:', () => {
+describe('Check routers:', () => {
   let responseImageNameInvalid: request.Response;
-  let responseWidth: request.Response;
+  let responseWidthInvalid: request.Response;
+  let responseHeightInvalid: request.Response;
   const imageNameInvalid = 'test2.jpg';
   const imageName = 'test.jpg';
-  const width = 200;
-  const height = 200;
-  const widthInvalid = 1000000;
+  const width = '200';
+  const widthInvalid = '100sdsds';
+  const height = '200';
+  const heightInvalid = '1000000';
 
   beforeEach(async () => {
     responseImageNameInvalid = await request(app).get(
       `/resizedimage?imageName=${imageNameInvalid}&width=${width}&height=${height}`,
     );
-    responseWidth = await request(app).get(
+    responseWidthInvalid = await request(app).get(
       `/resizedimage?imageName=${imageName}&width=${widthInvalid}&height=${height}`,
+    );
+    responseHeightInvalid = await request(app).get(
+      `/resizedimage?imageName=${imageName}&width=${width}&height=${heightInvalid}`,
     );
   });
 
-  it('Check function resizeImage status 400 and text is Image not exists in folder: ', () => {
-    expect(responseImageNameInvalid.status).toBe(404);
-    expect(responseImageNameInvalid.text).toBe('Image not exists in folder');
+  it('Check function resizeImage return status 400 and text is Image not exists in folder: ', () => {
+    expect(responseImageNameInvalid.status).toBe(400);
+    expect(responseImageNameInvalid.text).toBe('File not found or error resized !');
   });
 
-  it('Check function resizeImage return status 500 and text is Resizing the image error!. : ', () => {
-    expect(responseWidth.status).toBe(500);
-    expect(responseWidth.text).toBe('Resizing the image error!.');
+  it('Check function resizeImage return status 400 and text is Invalid width parameters : ', () => {
+    expect(responseWidthInvalid.status).toBe(400);
+    expect(responseWidthInvalid.text).toBe('Invalid width parameters');
+  });
+
+  it('Check function resizeImage return status 400 and text is File not found or error resized ! : ', () => {
+    expect(responseHeightInvalid.status).toBe(400);
+    expect(responseHeightInvalid.text).toBe('File not found or error resized !');
   });
 });
 
+describe("Test function resized :",()=>{
+  const imageNameInvalid = 'test2.jpg';
+  const imageName = 'test.jpg';
+  const width = '200';
+  const widthInvalid = '100sdsds';
+  const height = '200';
+  const heightInvalid = '1000000';
+
+  it('Check function resizeImage return object true and path file: ', () => {
+    resizeImage(imageName,width,height).then((result) => {
+      expect(result.Check).toBe(true);
+    })
+  });
+
+  it('Check function resizeImage with imageName invalid return false : ', () => {
+    resizeImage(imageNameInvalid,width,height).then((result) => {
+      expect(result.Check).toBe(false);
+    })
+  });
+
+  it('Check function resizeImage with width invalid return false: ', () => {
+    resizeImage(imageName,widthInvalid,height).then((result) => {
+      expect(result.Check).toBe(false);
+    })
+  });
+
+  it('Check function resizeImage with height invalid return false: ', () => {
+    resizeImage(imageName,width,heightInvalid).then((result) => {
+      expect(result.Check).toBe(false);
+    })
+  });
+})

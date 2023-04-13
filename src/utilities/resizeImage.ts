@@ -1,4 +1,3 @@
-import express from 'express';
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs';
@@ -6,8 +5,12 @@ import fs from 'fs';
 const IMAGES_FOLDER = path.join(__dirname, '../../folderImage/images');
 const RESIZED_FOLDER = path.join(__dirname, '../../folderImage/resized');
 
-const resizeImage = async (req: express.Request, res: express.Response) => {
-  const { imageName, width, height } = req.query;
+type jsonImagePath = {
+  Check : boolean,
+  path : string,
+}
+const resizeImage = async (imageName : string ,width: string,height : string) => {
+
   const pathFileImage = path.join(IMAGES_FOLDER, `${imageName}`);
   const checkFileImageIsExists = fs.existsSync(pathFileImage);
   const pathFileResized = path.join(
@@ -20,22 +23,24 @@ const resizeImage = async (req: express.Request, res: express.Response) => {
 
   try {
     if (!checkFileImageIsExists) {
-      res.status(404).send('Image not exists in folder');
-      return 0;
+      
+      return { Check : false,path : '',};
     }
 
     if (checkFileResizedIsExists) {
-      res.sendFile(pathFileResized);
+      return { Check : true,path : pathFileResized,};
     } else {
-      await sharp(pathFileImage)
-        .resize(parseInt(width as string), parseInt(height as string))
+       await sharp(pathFileImage)
+        .resize(parseInt(width as unknown as string), parseInt(height as unknown as string))
         .toFile(pathFileResized);
-      res.status(200);
-      res.sendFile(pathFileResized);
+      return { Check : true,path : pathFileResized,};
     }
   } catch (err) {
-    res.status(500).send('Resizing the image error!.');
-  }
-};
+    return { Check : false,path : pathFileResized,};
+    }
+  };
 
+  export const isNumeric = (str : string) => {
+    return /^\d+$/.test(str); 
+  }
 export default resizeImage;
